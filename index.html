@@ -4,7 +4,269 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>King俱乐部 - 专业游戏代练与陪玩服务</title>
+    <!-- Firebase CDN (ES模块形式) -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, orderBy } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-analytics.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB7jflJGH4PBZ9f9Oj9ssleEqmPiLnTm68",
+            authDomain: "king-club-website.firebaseapp.com",
+            projectId: "king-club-website",
+            storageBucket: "king-club-website.firebasestorage.app",
+            messagingSenderId: "36742164258",
+            appId: "1:36742164258:web:5d7c5791223a0839f3bf7b",
+            measurementId: "G-9RD74D1B8V"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const analytics = getAnalytics(app);
+
+        // 导航栏切换
+        document.querySelector('.mobile-menu-btn').addEventListener('click', function() {
+            document.querySelector('.nav-links').classList.toggle('active');
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                    // 关闭移动端菜单
+                    document.querySelector('.nav-links').classList.remove('active');
+                }
+            });
+        });
+
+        // 打开点单模态框
+        window.openOrderModal = function(game) {
+            document.getElementById('order-game').value = game;
+            document.getElementById('order-modal').style.display = 'flex';
+        }
+
+        // 关闭点单模态框
+        window.closeOrderModal = function() {
+            document.getElementById('order-modal').style.display = 'none';
+        }
+
+        // 提交点单
+        window.submitOrder = function(event) {
+            event.preventDefault();
+            const game = document.getElementById('order-game').value;
+            const name = document.getElementById('order-name').value;
+            const phone = document.getElementById('order-phone').value;
+            const service = document.getElementById('order-service').value;
+            const budget = document.getElementById('order-budget').value;
+            const requirements = document.getElementById('order-requirements').value;
+            const timestamp = new Date().toISOString();
+
+            // 存储到Firebase
+            addDoc(collection(db, 'orders'), {
+                game,
+                name,
+                phone,
+                service,
+                budget,
+                requirements,
+                timestamp
+            }).then(() => {
+                // 显示成功弹窗
+                document.getElementById('success-modal').style.display = 'flex';
+                // 重置表单
+                event.target.reset();
+                // 关闭模态框
+                closeOrderModal();
+            }).catch(error => {
+                console.error('Error adding order:', error);
+                alert('提交失败，请重试！');
+            });
+        }
+
+        // 提交打手报名
+        window.submitRecruitForm = function(event) {
+            event.preventDefault();
+            const game = document.getElementById('recruit-game').value;
+            const name = document.getElementById('recruit-name').value;
+            const wechat = document.getElementById('recruit-wechat').value;
+            const level = document.getElementById('recruit-level').value;
+            const timestamp = new Date().toISOString();
+
+            // 存储到Firebase
+            addDoc(collection(db, 'players'), {
+                game,
+                name,
+                wechat,
+                level,
+                timestamp
+            }).then(() => {
+                // 显示成功弹窗
+                document.getElementById('success-modal').style.display = 'flex';
+                // 重置表单
+                event.target.reset();
+            }).catch(error => {
+                console.error('Error adding player:', error);
+                alert('提交失败，请重试！');
+            });
+        }
+
+        // 关闭成功弹窗
+        window.closeSuccessModal = function() {
+            document.getElementById('success-modal').style.display = 'none';
+        }
+
+        // 打开管理员登录模态框
+        document.getElementById('admin-login-btn').addEventListener('click', function() {
+            document.getElementById('admin-login-modal').style.display = 'flex';
+        });
+
+        // 关闭管理员登录模态框
+        window.closeAdminLoginModal = function() {
+            document.getElementById('admin-login-modal').style.display = 'none';
+        }
+
+        // 管理员登录
+        window.adminLogin = function() {
+            const password = document.getElementById('admin-password').value;
+            if (password === '140618') {
+                closeAdminLoginModal();
+                openAdminPanel();
+            } else {
+                alert('密码错误！');
+            }
+        }
+
+        // 打开管理员面板
+        window.openAdminPanel = function() {
+            document.getElementById('admin-panel-modal').style.display = 'flex';
+            loadSubmissions();
+        }
+
+        // 关闭管理员面板
+        window.closeAdminPanel = function() {
+            document.getElementById('admin-panel-modal').style.display = 'none';
+        }
+
+        // 加载提交的表单
+        window.loadSubmissions = function() {
+            // 加载打手报名
+            const playerSubmissions = document.getElementById('player-submissions');
+            playerSubmissions.innerHTML = '';
+
+            getDocs(collection(db, 'players')).then(querySnapshot => {
+                if (querySnapshot.empty) {
+                    playerSubmissions.innerHTML = '<p>暂无报名</p>';
+                } else {
+                    const table = document.createElement('table');
+                    table.innerHTML = `
+                        <tr>
+                            <th>游戏</th>
+                            <th>姓名</th>
+                            <th>微信</th>
+                            <th>段位</th>
+                            <th>提交时间</th>
+                            <th>操作</th>
+                        </tr>
+                    `;
+                    querySnapshot.forEach(doc => {
+                        const data = doc.data();
+                        const row = table.insertRow();
+                        row.innerHTML = `
+                            <td>${data.game}</td>
+                            <td>${data.name}</td>
+                            <td>${data.wechat}</td>
+                            <td>${data.level}</td>
+                            <td>${new Date(data.timestamp).toLocaleString()}</td>
+                            <td><button class="btn btn-danger" onclick="deletePlayer('${doc.id}')">删除</button></td>
+                        `;
+                    });
+                    playerSubmissions.appendChild(table);
+                }
+            });
+
+            // 加载老板点单
+            const orderSubmissions = document.getElementById('order-submissions');
+            orderSubmissions.innerHTML = '';
+
+            getDocs(collection(db, 'orders')).then(querySnapshot => {
+                if (querySnapshot.empty) {
+                    orderSubmissions.innerHTML = '<p>暂无订单</p>';
+                } else {
+                    const table = document.createElement('table');
+                    table.innerHTML = `
+                        <tr>
+                            <th>游戏</th>
+                            <th>称呼</th>
+                            <th>手机号</th>
+                            <th>服务类型</th>
+                            <th>预算</th>
+                            <th>提交时间</th>
+                            <th>操作</th>
+                        </tr>
+                    `;
+                    querySnapshot.forEach(doc => {
+                        const data = doc.data();
+                        const row = table.insertRow();
+                        row.innerHTML = `
+                            <td>${data.game}</td>
+                            <td>${data.name}</td>
+                            <td>${data.phone}</td>
+                            <td>${data.service}</td>
+                            <td>${data.budget}</td>
+                            <td>${new Date(data.timestamp).toLocaleString()}</td>
+                            <td><button class="btn btn-danger" onclick="deleteOrder('${doc.id}')">删除</button></td>
+                        `;
+                    });
+                    orderSubmissions.appendChild(table);
+                }
+            });
+        }
+
+        // 删除打手报名
+        window.deletePlayer = function(id) {
+            if (confirm('确定要删除这条记录吗？')) {
+                deleteDoc(doc(db, 'players', id)).then(() => {
+                    loadSubmissions();
+                }).catch(error => {
+                    console.error('Error deleting player:', error);
+                    alert('删除失败，请重试！');
+                });
+            }
+        }
+
+        // 删除订单
+        window.deleteOrder = function(id) {
+            if (confirm('确定要删除这条记录吗？')) {
+                deleteDoc(doc(db, 'orders', id)).then(() => {
+                    loadSubmissions();
+                }).catch(error => {
+                    console.error('Error deleting order:', error);
+                    alert('删除失败，请重试！');
+                });
+            }
+        }
+
+        // 关闭模态框
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+    </script>
     <style>
+        /* 原有样式保持不变 */
         * {
             margin: 0;
             padding: 0;
@@ -57,12 +319,12 @@
             list-style: none;
         }
         .nav-links li {
-            margin-left: 30px;
+            margin: 0 15px;
         }
         .nav-links a {
             color: #fff;
             text-decoration: none;
-            font-size: 1rem;
+            font-size: 1.1rem;
             transition: color 0.3s ease;
         }
         .nav-links a:hover {
@@ -76,119 +338,104 @@
             font-size: 1.5rem;
             cursor: pointer;
         }
-        /* Hero区 */
+        /* 英雄区 */
         .hero {
             height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('data:image/svg+xml,%3Csvg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z" fill="%23ffd700" fill-opacity="0.1" fill-rule="evenodd"/%3E%3C/svg%3E');
+            background-size: cover;
+            background-position: center;
             text-align: center;
             position: relative;
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
-            overflow: hidden;
-        }
-        .hero::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffd700" fill-opacity="0.05"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');
-            z-index: 0;
         }
         .hero-content {
-            position: relative;
             z-index: 1;
-            max-width: 800px;
         }
         .hero h1 {
-            font-size: 3.5rem;
+            font-size: 4rem;
             margin-bottom: 20px;
             color: #ffd700;
-            text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
         }
         .hero p {
-            font-size: 1.3rem;
+            font-size: 1.5rem;
             margin-bottom: 40px;
             color: rgba(255, 255, 255, 0.8);
-            line-height: 1.8;
         }
         .btn-group {
             display: flex;
             justify-content: center;
             gap: 20px;
-            flex-wrap: wrap;
         }
         .btn {
-            display: inline-block;
-            padding: 15px 30px;
+            padding: 12px 30px;
+            border: none;
             border-radius: 50px;
-            text-decoration: none;
-            font-weight: bold;
             font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
             transition: all 0.3s ease;
-            border: 2px solid transparent;
+            text-decoration: none;
+            display: inline-block;
         }
         .btn-primary {
             background: #ffd700;
-            color: #0a0a0a;
+            color: #000;
         }
         .btn-primary:hover {
-            background: transparent;
-            color: #ffd700;
-            border-color: #ffd700;
+            background: #e6c200;
             transform: translateY(-3px);
             box-shadow: 0 10px 20px rgba(255, 215, 0, 0.3);
         }
         .btn-secondary {
             background: transparent;
             color: #ffd700;
-            border-color: #ffd700;
+            border: 2px solid #ffd700;
         }
         .btn-secondary:hover {
             background: #ffd700;
-            color: #0a0a0a;
+            color: #000;
             transform: translateY(-3px);
             box-shadow: 0 10px 20px rgba(255, 215, 0, 0.3);
-        }
-        .btn-danger {
-            background: #dc3545;
-            color: #fff;
-            border: 1px solid #dc3545;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-        .btn-danger:hover {
-            background: #c82333;
-            border-color: #bd2130;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 10px rgba(220, 53, 69, 0.3);
         }
         /* 服务项目区 */
         .services {
             padding: 100px 0;
-            background: #121212;
+            background: #0a0a0a;
+            position: relative;
+        }
+        .services::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml,%3Csvg width="84" height="48" viewBox="0 0 84 48" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M0 0h12v6H0V0zm28 8h12v6H28V8zm14-8h12v6H42V0zm14 0h12v6H56V0zm0 8h12v6H56V8zM42 8h12v6H42V8zm0 16h12v6H42v-6zm14-8h12v6H56v-6zm14 0h12v6H70v-6zm0-16h12v6H70V0zM28 32h12v6H28v-6zM14 16h12v6H14v-6zM0 24h12v6H0v-6zm0 8h12v6H0v-6zm14 0h12v6H14v-6zm14 8h12v6H28v-6zm-14 0h12v6H14v-6zm28 0h12v6H42v-6zm14-8h12v6H56v-6zm0-8h12v6H56v-6zm14 8h12v6H70v-6zm0 8h12v6H70v-6zM14 24h12v6H14v-6zm14-8h12v6H28v-6zM14 8h12v6H14V8zM0 8h12v6H0V8z" fill="%23ffd700" fill-opacity="0.05" fill-rule="evenodd"/%3E%3C/svg%3E');
+            z-index: 0;
         }
         .section-title {
             text-align: center;
             margin-bottom: 60px;
+            position: relative;
+            z-index: 1;
         }
         .section-title h2 {
-            font-size: 2.5rem;
+            font-size: 3rem;
+            margin-bottom: 20px;
             color: #ffd700;
-            margin-bottom: 15px;
         }
         .section-title p {
             font-size: 1.2rem;
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(255, 255, 255, 0.8);
         }
         .services-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 40px;
+            position: relative;
+            z-index: 1;
         }
         .service-card {
             background: rgba(255, 255, 255, 0.05);
@@ -199,89 +446,31 @@
         }
         .service-card:hover {
             transform: translateY(-10px);
-            border-color: #ffd700;
             box-shadow: 0 20px 40px rgba(255, 215, 0, 0.1);
         }
         .service-card h3 {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             color: #ffd700;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-        }
-        .service-card h3::before {
-            content: "👑";
-            margin-right: 10px;
-            font-size: 1.2rem;
+            margin-bottom: 20px;
         }
         .service-card .price {
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: #fff;
+            font-size: 1.2rem;
+            color: #ffd700;
             margin-bottom: 20px;
+            font-weight: bold;
         }
         .service-card ul {
             list-style: none;
             margin-bottom: 30px;
         }
         .service-card li {
-            padding: 8px 0;
-            color: rgba(255, 255, 255, 0.8);
-            position: relative;
-            padding-left: 25px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .service-card li::before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: #ffd700;
-            font-weight: bold;
+        .service-card li:last-child {
+            border-bottom: none;
         }
-        .service-card li strong {
-            color: #ffd700;
-        }
-        .service-card li[style*="padding-left: 20px"] {
-            padding-left: 45px;
-        }
-        .service-card li[style*="padding-left: 20px"]::before {
-            content: "•";
-            left: 20px;
-        }
-        /* 联系客服区 */
-        .contact-section {
-            padding: 100px 0;
-            background: #121212;
-        }
-        .contact-content {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 40px;
-            justify-content: center;
-            align-items: center;
-        }
-        .contact-info {
-            flex: 1;
-            min-width: 300px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 40px;
-            border: 1px solid rgba(255, 215, 0, 0.2);
-            text-align: center;
-        }
-        .contact-info h3 {
-            font-size: 1.5rem;
-            color: #ffd700;
-            margin-bottom: 30px;
-        }
-        .contact-details {
-            margin-top: 30px;
-        }
-        .contact-details p {
-            color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 10px;
-            font-size: 1.1rem;
-        }
-        .contact-details strong {
+        .service-card strong {
             color: #ffd700;
         }
         /* 招募打手区 */
@@ -320,98 +509,47 @@
             color: #ffd700;
             margin-bottom: 20px;
         }
+        .recruit-card h4 {
+            font-size: 1.2rem;
+            color: #ffd700;
+            margin-bottom: 15px;
+        }
+        .recruit-card h5 {
+            font-size: 1.1rem;
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
         .recruit-card ul {
             list-style: none;
+            margin-bottom: 20px;
         }
         .recruit-card li {
             padding: 10px 0;
-            color: rgba(255, 255, 255, 0.8);
-            position: relative;
-            padding-left: 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .recruit-card li::before {
-            content: "⭐";
-            position: absolute;
-            left: 0;
-            font-size: 0.8rem;
+        .recruit-card li:last-child {
+            border-bottom: none;
         }
-        /* 招募老板区 */
-        .recruit-bosses {
-            padding: 100px 0;
-            background: #121212;
-        }
-        .boss-content {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 60px;
-            align-items: center;
-        }
-        .boss-text {
-            flex: 1;
-            min-width: 300px;
-        }
-        .boss-text h3 {
-            font-size: 2rem;
-            color: #ffd700;
-            margin-bottom: 20px;
-        }
-        .boss-text ul {
-            list-style: none;
-            margin-bottom: 40px;
-        }
-        .boss-text li {
-            padding: 15px 0;
-            color: rgba(255, 255, 255, 0.8);
-            position: relative;
-            padding-left: 30px;
-        }
-        .boss-text li::before {
-            content: "👑";
-            position: absolute;
-            left: 0;
-            color: #ffd700;
-        }
-        .boss-contact {
-            flex: 1;
-            min-width: 300px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 40px;
-            border: 1px solid rgba(255, 215, 0, 0.2);
-            text-align: center;
-        }
-        .boss-contact h4 {
-            font-size: 1.3rem;
-            color: #ffd700;
-            margin-bottom: 20px;
-        }
-        .qrcode {
-            width: 200px;
-            height: 200px;
-            background: #fff;
-            margin: 0 auto 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: #0a0a0a;
-            font-weight: bold;
-        }
-        /* 表单 */
-        #player-form {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 40px;
-            border: 1px solid rgba(255, 215, 0, 0.2);
+        .recruit-form {
             margin-top: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 40px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+        .recruit-form h3 {
+            font-size: 1.5rem;
+            color: #ffd700;
+            margin-bottom: 30px;
+            text-align: center;
         }
         .form-group {
             margin-bottom: 20px;
         }
         .form-group label {
             display: block;
-            margin-bottom: 8px;
-            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 10px;
+            color: #ffd700;
             font-weight: bold;
         }
         .form-group input,
@@ -419,36 +557,84 @@
         .form-group textarea {
             width: 100%;
             padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 215, 0, 0.3);
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
             color: #fff;
             font-size: 1rem;
         }
-        .form-group select option {
-            background: #0a0a0a;
-            color: #fff;
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #ffd700;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
         }
         .form-group textarea {
             resize: vertical;
-            height: 120px;
+            min-height: 100px;
+        }
+        /* 联系客服区 */
+        .contact {
+            padding: 100px 0;
+            background: #0a0a0a;
+            position: relative;
+        }
+        .contact::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml,%3Csvg width="84" height="48" viewBox="0 0 84 48" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M0 0h12v6H0V0zm28 8h12v6H28V8zm14-8h12v6H42V0zm14 0h12v6H56V0zm0 8h12v6H56V8zM42 8h12v6H42V8zm0 16h12v6H42v-6zm14-8h12v6H56v-6zm14 0h12v6H70v-6zm0-16h12v6H70V0zM28 32h12v6H28v-6zM14 16h12v6H14v-6zM0 24h12v6H0v-6zm0 8h12v6H0v-6zm14 0h12v6H14v-6zm14 8h12v6H28v-6zm-14 0h12v6H14v-6zm28 0h12v6H42v-6zm14-8h12v6H56v-6zm0-8h12v6H56v-6zm14 8h12v6H70v-6zm0 8h12v6H70v-6zM14 24h12v6H14v-6zm14-8h12v6H28v-6zM14 8h12v6H14V8zM0 8h12v6H0V8z" fill="%23ffd700" fill-opacity="0.05" fill-rule="evenodd"/%3E%3C/svg%3E');
+            z-index: 0;
+        }
+        .contact-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: center;
+        }
+        .contact-info {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 40px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+        .contact-info h3 {
+            font-size: 1.8rem;
+            color: #ffd700;
+            margin-bottom: 30px;
+        }
+        .contact-details {
+            text-align: left;
+        }
+        .contact-details p {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        .contact-details strong {
+            color: #ffd700;
         }
         /* 底部 */
         footer {
-            background: #0a0a0a;
             padding: 60px 0;
+            background: #000;
             border-top: 1px solid rgba(255, 215, 0, 0.3);
-            text-align: center;
         }
         .footer-content {
             display: flex;
+            justify-content: space-around;
             flex-wrap: wrap;
-            justify-content: space-between;
             gap: 40px;
         }
         .footer-info {
-            flex: 1;
-            min-width: 250px;
+            flex: 1 1 200px;
+            min-width: 200px;
         }
         .footer-info h4 {
             font-size: 1.3rem;
@@ -456,50 +642,90 @@
             margin-bottom: 20px;
         }
         .footer-info p {
-            color: rgba(255, 255, 255, 0.7);
             margin-bottom: 10px;
+            color: rgba(255, 255, 255, 0.8);
         }
-        .footer-bottom {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.5);
-        }
-        /* 弹窗 */
+        /* 模态框 */
         .modal {
             display: none;
             position: fixed;
-            top: 0;
+            z-index: 2000;
             left: 0;
+            top: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 2000;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.8);
             justify-content: center;
             align-items: center;
         }
         .modal-content {
-            background: #121212;
-            border-radius: 15px;
+            background: #0a0a0a;
+            margin: 15% auto;
             padding: 40px;
-            max-width: 500px;
-            width: 90%;
-            text-align: center;
             border: 1px solid #ffd700;
-        }
-        .modal-content h3 {
-            color: #ffd700;
-            margin-bottom: 20px;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 15px;
+            position: relative;
         }
         .close-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: none;
-            border: none;
-            color: #fff;
-            font-size: 1.5rem;
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
             cursor: pointer;
+            position: absolute;
+            top: 15px;
+            right: 20px;
+        }
+        .close-btn:hover,
+        .close-btn:focus {
+            color: #ffd700;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        /* 管理员面板 */
+        #admin-panel-modal .modal-content {
+            max-width: 1000px;
+            width: 90%;
+        }
+        #submissions-container {
+            margin-top: 20px;
+        }
+        #submissions-container h4 {
+            color: #ffd700;
+            margin-bottom: 15px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+        }
+        th {
+            background-color: rgba(255, 215, 0, 0.1);
+            color: #ffd700;
+            font-weight: bold;
+        }
+        tr:hover {
+            background-color: rgba(255, 215, 0, 0.05);
+        }
+        .btn-danger {
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .btn-danger:hover {
+            background: #c82333;
         }
         /* 响应式设计 */
         @media (max-width: 768px) {
@@ -508,20 +734,17 @@
                 top: 70px;
                 left: 0;
                 width: 100%;
-                background: #0a0a0a;
+                background: rgba(10, 10, 10, 0.95);
                 flex-direction: column;
                 align-items: center;
                 padding: 20px 0;
-                border-top: 1px solid rgba(255, 215, 0, 0.3);
-                transform: translateY(-100%);
-                opacity: 0;
-                transition: all 0.3s ease;
-                pointer-events: none;
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+                transform: translateY(-150%);
+                transition: transform 0.3s ease;
+                z-index: 999;
             }
             .nav-links.active {
                 transform: translateY(0);
-                opacity: 1;
-                pointer-events: all;
             }
             .nav-links li {
                 margin: 15px 0;
@@ -533,7 +756,7 @@
                 font-size: 2.5rem;
             }
             .hero p {
-                font-size: 1.1rem;
+                font-size: 1.2rem;
             }
             .btn-group {
                 flex-direction: column;
@@ -547,8 +770,12 @@
             .recruit-grid {
                 grid-template-columns: 1fr;
             }
-            .boss-content {
+            .footer-content {
                 flex-direction: column;
+                align-items: center;
+            }
+            .footer-info {
+                text-align: center;
             }
         }
     </style>
@@ -569,7 +796,7 @@
         </div>
     </nav>
 
-    <!-- Hero区 -->
+    <!-- 英雄区 -->
     <section class="hero">
         <div class="container hero-content">
             <h1>King俱乐部</h1>
@@ -601,14 +828,14 @@
                         <li style="padding-left: 20px;">王者0星 → 荣耀(50星)：单价约15-25元/星</li>
                         <li style="padding-left: 20px;">50星以上，100星以下：单价约25-45元/星</li>
                         <li style="padding-left: 20px;">100星以上：45-60元/星</li>
-                        <li style="padding-left: 20px;">巅峰赛：按积分定价，每 100-300积分 约 30-80元</li>
+                        <li style="padding-left: 20px;">巅峰赛：按积分定价，每 100-300积分 约 30-80元。</li>
                         <li><strong>陪玩价格参考：</strong></li>
-                        <li style="padding-left: 20px;">娱乐陪/低段位：约 15-25元/小时，主打"态度好、不坑人"，能活跃气氛</li>
-                        <li style="padding-left: 20px;">技术陪/高段位：约 30-50元/小时，能带飞、战术指挥，帮助老板提升技术</li>
-                        <li style="padding-left: 20px;">大神陪/职业级：约 60元/小时以上，通常是国服水平或知名玩家，可高溢价</li>
+                        <li style="padding-left: 20px;">娱乐陪/低段位：约 15-25元/小时，主打"态度好、不坑人"，能活跃气氛。</li>
+                        <li style="padding-left: 20px;">技术陪/高段位：约 30-50元/小时，能带飞、战术指挥，帮助老板提升技术。</li>
+                        <li style="padding-left: 20px;">大神陪/职业级：约 60元/小时以上，通常是国服水平或知名玩家，可高溢价。</li>
                         <li><strong>其他服务收费标准：</strong></li>
-                        <li style="padding-left: 20px;">指定英雄/熟练度：普通英雄约 10-30元/英雄；高难度或冷门英雄约 50-100元/英雄</li>
-                        <li style="padding-left: 20px;">英雄战力/标：战力单可按战力值收费，市价约 1-2元/万战力。省/市/国标因难度差异大，多为定制报价</li>
+                        <li style="padding-left: 20px;">指定英雄/熟练度：普通英雄约 10-30元/英雄；高难度或冷门英雄约 50-100元/英雄。</li>
+                        <li style="padding-left: 20px;">英雄战力/标：战力单可按战力值收费，市价约 1-2元/万战力。省/市/国标因难度差异大，多为定制报价。</li>
                     </ul>
                     <button class="btn btn-primary" style="margin-top: 20px; width: 100%;" onclick="openOrderModal('王者荣耀')">立即下单</button>
                 </div>
@@ -740,41 +967,36 @@
                     </ul>
                 </div>
             </div>
-            
-            <!-- 打手报名表单 -->
-            <form id="player-form">
-                <h3 style="color: #ffd700; margin-bottom: 30px; text-align: center;">打手报名</h3>
-                <div class="form-group">
-                    <label for="name">姓名</label>
-                    <input type="text" id="name" name="name" required>
-                </div>
-                <div class="form-group">
-                    <label for="game">游戏</label>
-                    <select id="game" name="game" required>
-                        <option value="">请选择游戏</option>
-                        <option value="王者荣耀">王者荣耀</option>
-                        <option value="三角洲行动">三角洲行动</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="rank">段位</label>
-                    <input type="text" id="rank" name="rank" required>
-                </div>
-                <div class="form-group">
-                    <label for="wechat">微信</label>
-                    <input type="text" id="wechat" name="wechat" required>
-                </div>
-                <div class="form-group">
-                    <label for="intro">自我介绍</label>
-                    <textarea id="intro" name="intro" required></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">提交报名</button>
-            </form>
+            <div class="recruit-form">
+                <h3>打手报名</h3>
+                <form onsubmit="submitRecruitForm(event)">
+                    <div class="form-group">
+                        <label for="recruit-game">游戏</label>
+                        <select id="recruit-game" required>
+                            <option value="王者荣耀">王者荣耀</option>
+                            <option value="三角洲行动">三角洲行动</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="recruit-name">姓名</label>
+                        <input type="text" id="recruit-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="recruit-wechat">微信</label>
+                        <input type="text" id="recruit-wechat" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="recruit-level">段位</label>
+                        <input type="text" id="recruit-level" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">提交报名</button>
+                </form>
+            </div>
         </div>
     </section>
 
     <!-- 联系客服区 -->
-    <section class="contact-section" id="contact">
+    <section class="contact" id="contact">
         <div class="container">
             <div class="section-title">
                 <h2>联系客服</h2>
@@ -793,8 +1015,6 @@
             </div>
         </div>
     </section>
-
-
 
     <!-- 底部 -->
     <footer>
@@ -820,43 +1040,24 @@
                     <p>节假日不休</p>
                 </div>
             </div>
-
         </div>
     </footer>
 
-
-
-    <!-- 提交成功弹窗 -->
-    <div class="modal" id="success-modal">
-        <div class="modal-content">
-            <button class="close-btn">&times;</button>
-            <h3>提交成功</h3>
-            <p>我们会尽快联系您，感谢您的加入！</p>
-        </div>
-    </div>
-
-    <!-- 管理员登录弹窗 -->
+    <!-- 管理员登录模态框 -->
     <div class="modal" id="admin-login-modal">
-        <div class="modal-content" style="max-width: 400px;">
-            <button class="close-btn">&times;</button>
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeAdminLoginModal()">&times;</button>
             <h3>管理员登录</h3>
-            <form id="admin-login-form">
-                <div class="form-group">
-                    <label for="admin-password">密码</label>
-                    <input type="password" id="admin-password" name="admin-password" required>
-                </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">登录</button>
-            </form>
+            <input type="password" id="admin-password" placeholder="请输入密码" required>
+            <button class="btn btn-primary" onclick="adminLogin()">登录</button>
         </div>
     </div>
 
-    <!-- 管理员面板 -->
-    <div class="modal" id="admin-panel" style="display: none;">
-        <div class="modal-content" style="max-width: 800px; max-height: 80vh; overflow-y: auto;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3>管理员面板</h3>
-                <button id="admin-logout" class="btn btn-secondary">退出</button>
-            </div>
+    <!-- 管理员面板模态框 -->
+    <div class="modal" id="admin-panel-modal">
+        <div class="modal-content" style="width: 90%; max-width: 1000px; max-height: 80vh; overflow-y: auto;">
+            <button class="close-btn" onclick="closeAdminPanel()">&times;</button>
+            <h3>管理员面板</h3>
             <div id="submissions-container">
                 <h4>打手报名列表</h4>
                 <div id="player-submissions"></div>
@@ -866,261 +1067,49 @@
         </div>
     </div>
 
-    <!-- 老板点单模态框 -->
-    <div class="modal" id="order-modal" style="display: none;">
-        <div class="modal-content" style="max-width: 500px;">
-            <button class="close-btn">&times;</button>
+    <!-- 点单模态框 -->
+    <div class="modal" id="order-modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeOrderModal()">&times;</button>
             <h3>老板点单</h3>
-            <form id="order-form">
-                <div class="form-group">
-                    <label for="order-game">游戏</label>
-                    <input type="text" id="order-game" name="order-game" readonly>
-                </div>
+            <form onsubmit="submitOrder(event)">
+                <input type="hidden" id="order-game" value="">
                 <div class="form-group">
                     <label for="order-name">称呼</label>
-                    <input type="text" id="order-name" name="order-name" required>
+                    <input type="text" id="order-name" required>
                 </div>
                 <div class="form-group">
-                    <label for="order-wechat">手机号</label>
-                    <input type="text" id="order-wechat" name="order-wechat" required>
+                    <label for="order-phone">手机号</label>
+                    <input type="tel" id="order-phone" required>
                 </div>
                 <div class="form-group">
                     <label for="order-service">服务类型</label>
-                    <select id="order-service" name="order-service" required>
-                        <option value="">请选择服务类型</option>
+                    <select id="order-service" required>
                         <option value="代练">代练</option>
                         <option value="陪玩">陪玩</option>
                         <option value="其他">其他</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="order-demand">具体需求</label>
-                    <textarea id="order-demand" name="order-demand" rows="4" required></textarea>
+                    <label for="order-budget">预算</label>
+                    <input type="text" id="order-budget" placeholder="请输入预算" required>
                 </div>
                 <div class="form-group">
-                    <label for="order-budget">预算</label>
-                    <input type="text" id="order-budget" name="order-budget" required>
+                    <label for="order-requirements">具体需求</label>
+                    <textarea id="order-requirements" rows="4" required></textarea>
                 </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">提交订单</button>
+                <button type="submit" class="btn btn-primary">提交订单</button>
             </form>
         </div>
     </div>
 
-    <script>
-        // 导航栏移动端菜单
-        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-        const navLinks = document.querySelector('.nav-links');
-        
-        mobileMenuBtn.addEventListener('click', () => {
-            navLinks.classList.toggle('active');
-        });
-        
-        // 平滑滚动
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ 
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                    // 关闭移动端菜单
-                    navLinks.classList.remove('active');
-                }
-            });
-        });
-        
-        // 表单提交
-        const playerForm = document.getElementById('player-form');
-        const successModal = document.getElementById('success-modal');
-        const closeBtns = document.querySelectorAll('.close-btn');
-        
-        playerForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            // 获取表单数据
-            const formData = {
-                name: document.getElementById('name').value,
-                game: document.getElementById('game').value,
-                rank: document.getElementById('rank').value,
-                wechat: document.getElementById('wechat').value,
-                intro: document.getElementById('intro').value,
-                timestamp: new Date().toLocaleString()
-            };
-            
-            // 存储到localStorage
-            let submissions = JSON.parse(localStorage.getItem('playerSubmissions') || '[]');
-            submissions.push(formData);
-            localStorage.setItem('playerSubmissions', JSON.stringify(submissions));
-            
-            // 显示成功弹窗
-            successModal.style.display = 'flex';
-            // 重置表单
-            playerForm.reset();
-        });
-        
-        // 关闭弹窗
-        closeBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                btn.closest('.modal').style.display = 'none';
-            });
-        });
-        
-        // 点击弹窗外部关闭
-        window.addEventListener('click', (e) => {
-            if (e.target.classList.contains('modal')) {
-                e.target.style.display = 'none';
-            }
-        });
-        
-        // 管理员登录
-        const adminLoginBtn = document.getElementById('admin-login-btn');
-        const adminLoginModal = document.getElementById('admin-login-modal');
-        const adminLoginForm = document.getElementById('admin-login-form');
-        const adminPanel = document.getElementById('admin-panel');
-        const adminLogout = document.getElementById('admin-logout');
-        const playerSubmissionsContainer = document.getElementById('player-submissions');
-        
-        adminLoginBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            adminLoginModal.style.display = 'flex';
-        });
-        
-        adminLoginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const password = document.getElementById('admin-password').value;
-            if (password === '140618') {
-                adminLoginModal.style.display = 'none';
-                adminPanel.style.display = 'flex';
-                displaySubmissions();
-                displayOrders();
-            } else {
-                alert('密码错误，请重试');
-            }
-        });
-        
-        adminLogout.addEventListener('click', () => {
-            adminPanel.style.display = 'none';
-        });
-        
-        function displaySubmissions() {
-            const submissions = JSON.parse(localStorage.getItem('playerSubmissions') || '[]');
-            if (submissions.length === 0) {
-                playerSubmissionsContainer.innerHTML = '<p>暂无提交记录</p>';
-                return;
-            }
-            
-            let html = '<table style="width: 100%; border-collapse: collapse; margin-top: 20px;">';
-            html += '<thead><tr style="border-bottom: 1px solid #ffd700;"><th style="padding: 10px; text-align: left;">姓名</th><th style="padding: 10px; text-align: left;">游戏</th><th style="padding: 10px; text-align: left;">段位</th><th style="padding: 10px; text-align: left;">微信</th><th style="padding: 10px; text-align: left;">提交时间</th><th style="padding: 10px; text-align: center;">操作</th></tr></thead>';
-            html += '<tbody>';
-            
-            submissions.forEach((submission, index) => {
-                html += `<tr style="border-bottom: 1px solid rgba(255, 215, 0, 0.3);">`;
-                html += `<td style="padding: 10px;">${submission.name}</td>`;
-                html += `<td style="padding: 10px;">${submission.game}</td>`;
-                html += `<td style="padding: 10px;">${submission.rank}</td>`;
-                html += `<td style="padding: 10px;">${submission.wechat}</td>`;
-                html += `<td style="padding: 10px;">${submission.timestamp}</td>`;
-                html += `<td style="padding: 10px; text-align: center;"><button class="btn btn-danger" onclick="deleteSubmission(${index})">删除</button></td>`;
-                html += `</tr>`;
-            });
-            
-            html += '</tbody></table>';
-            playerSubmissionsContainer.innerHTML = html;
-        }
-        
-        function deleteSubmission(index) {
-            if (confirm('确定要删除这条记录吗？')) {
-                let submissions = JSON.parse(localStorage.getItem('playerSubmissions') || '[]');
-                submissions.splice(index, 1);
-                localStorage.setItem('playerSubmissions', JSON.stringify(submissions));
-                displaySubmissions();
-            }
-        }
-        
-        // 老板点单功能
-        const orderModal = document.getElementById('order-modal');
-        const orderForm = document.getElementById('order-form');
-        const orderSubmissionsContainer = document.getElementById('order-submissions');
-        
-        function openOrderModal(game) {
-            document.getElementById('order-game').value = game;
-            orderModal.style.display = 'flex';
-        }
-        
-        orderForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            // 获取表单数据
-            const formData = {
-                game: document.getElementById('order-game').value,
-                name: document.getElementById('order-name').value,
-                phone: document.getElementById('order-wechat').value,
-                service: document.getElementById('order-service').value,
-                demand: document.getElementById('order-demand').value,
-                budget: document.getElementById('order-budget').value,
-                timestamp: new Date().toLocaleString()
-            };
-            
-            // 存储到localStorage
-            let orders = JSON.parse(localStorage.getItem('orderSubmissions') || '[]');
-            orders.push(formData);
-            localStorage.setItem('orderSubmissions', JSON.stringify(orders));
-            
-            // 显示成功弹窗
-            successModal.style.display = 'flex';
-            // 重置表单
-            orderForm.reset();
-            // 关闭点单模态框
-            orderModal.style.display = 'none';
-        });
-        
-        function displayOrders() {
-            const orders = JSON.parse(localStorage.getItem('orderSubmissions') || '[]');
-            if (orders.length === 0) {
-                orderSubmissionsContainer.innerHTML = '<p>暂无订单记录</p>';
-                return;
-            }
-            
-            let html = '<table style="width: 100%; border-collapse: collapse; margin-top: 20px;">';
-            html += '<thead><tr style="border-bottom: 1px solid #ffd700;"><th style="padding: 10px; text-align: left;">游戏</th><th style="padding: 10px; text-align: left;">称呼</th><th style="padding: 10px; text-align: left;">手机号</th><th style="padding: 10px; text-align: left;">服务类型</th><th style="padding: 10px; text-align: left;">预算</th><th style="padding: 10px; text-align: left;">提交时间</th><th style="padding: 10px; text-align: center;">操作</th></tr></thead>';
-            html += '<tbody>';
-            
-            orders.forEach((order, index) => {
-                html += `<tr style="border-bottom: 1px solid rgba(255, 215, 0, 0.3);">`;
-                html += `<td style="padding: 10px;">${order.game}</td>`;
-                html += `<td style="padding: 10px;">${order.name}</td>`;
-                html += `<td style="padding: 10px;">${order.phone}</td>`;
-                html += `<td style="padding: 10px;">${order.service}</td>`;
-                html += `<td style="padding: 10px;">${order.budget}</td>`;
-                html += `<td style="padding: 10px;">${order.timestamp}</td>`;
-                html += `<td style="padding: 10px; text-align: center;"><button class="btn btn-danger" onclick="deleteOrder(${index})">删除</button></td>`;
-                html += `</tr>`;
-            });
-            
-            html += '</tbody></table>';
-            orderSubmissionsContainer.innerHTML = html;
-        }
-        
-        function deleteOrder(index) {
-            if (confirm('确定要删除这条订单记录吗？')) {
-                let orders = JSON.parse(localStorage.getItem('orderSubmissions') || '[]');
-                orders.splice(index, 1);
-                localStorage.setItem('orderSubmissions', JSON.stringify(orders));
-                displayOrders();
-            }
-        }
-        
-        // 导航栏滚动效果
-        window.addEventListener('scroll', () => {
-            const nav = document.querySelector('nav');
-            if (window.scrollY > 100) {
-                nav.style.background = 'rgba(10, 10, 10, 0.98)';
-            } else {
-                nav.style.background = 'rgba(10, 10, 10, 0.95)';
-            }
-        });
-    </script>
+    <!-- 提交成功弹窗 -->
+    <div class="modal" id="success-modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeSuccessModal()">&times;</button>
+            <h3>提交成功</h3>
+            <p>我们会尽快联系您，感谢您的加入！</p>
+        </div>
+    </div>
 </body>
 </html>
