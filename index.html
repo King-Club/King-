@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>King俱乐部 - 专业游戏代练与陪玩服务</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            line-height: 1.6;
+            color: #fff;
+            background-color: #0a0a0a;
+            overflow-x: hidden;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        /* 导航栏 */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+        }
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #ffd700;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        .logo::before {
+            content: "👑";
+            margin-right: 10px;
+            font-size: 1.5rem;
+        }
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+        .nav-links li {
+            margin-left: 30px;
+        }
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: color 0.3s ease;
+        }
+        .nav-links a:hover {
+            color: #ffd700;
+        }
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        /* Hero区 */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            overflow: hidden;
+        }
+        .hero::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffd700" fill-opacity="0.05"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');
+            z-index: 0;
+        }
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+        }
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            color: #ffd700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 40px;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.8;
+        }
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        .btn-primary {
+            background: #ffd700;
+            color: #0a0a0a;
+        }
+        .btn-primary:hover {
+            background: transparent;
+            color: #ffd700;
+            border-color: #ffd700;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(255, 215, 0, 0.3);
+        }
+        .btn-secondary {
+            background: transparent;
+            color: #ffd700;
+            border-color: #ffd700;
+        }
+        .btn-secondary:hover {
+            background: #ffd700;
+            color: #0a0a0a;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(255, 215, 0, 0.3);
+        }
+        .btn-danger {
+            background: #dc3545;
+            color: #fff;
+            border: 1px solid #dc3545;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .btn-danger:hover {
+            background: #c82333;
+            border-color: #bd2130;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(220, 53, 69, 0.3);
+        }
+        /* 服务项目区 */
+        .services {
+            padding: 100px 0;
+            background: #121212;
+        }
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        .section-title h2 {
+            font-size: 2.5rem;
+            color: #ffd700;
+            margin-bottom: 15px;
+        }
+        .section-title p {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+        }
+        .service-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 40px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        .service-card:hover {
+            transform: translateY(-10px);
+            border-color: #ffd700;
+            box-shadow: 0 20px 40px rgba(255, 215, 0, 0.1);
+        }
+        .service-card h3 {
+            font-size: 1.5rem;
+            color: #ffd700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        .service-card h3::before {
+            content: "👑";
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        .service-card .price {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+        .service-card ul {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+        .service-card li {
+            padding: 8px 0;
+            color: rgba(255, 255, 255, 0.8);
+            position: relative;
+            padding-left: 25px;
+        }
+        .service-card li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #ffd700;
+            font-weight: bold;
+        }
+        .service-card li strong {
+            color: #ffd700;
+        }
+        .service-card li[style*="padding-left: 20px"] {
+            padding-left: 45px;
+        }
+        .service-card li[style*="padding-left: 20px"]::before {
+            content: "•";
+            left: 20px;
+        }
+        /* 联系客服区 */
+        .contact-section {
+            padding: 100px 0;
+            background: #121212;
+        }
+        .contact-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            justify-content: center;
+            align-items: center;
+        }
+        .contact-info {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 40px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            text-align: center;
+        }
+        .contact-info h3 {
+            font-size: 1.5rem;
+            color: #ffd700;
+            margin-bottom: 30px;
+        }
+        .contact-details {
+            margin-top: 30px;
+        }
+        .contact-details p {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        .contact-details strong {
+            color: #ffd700;
+        }
+        /* 招募打手区 */
+        .recruit-players {
+            padding: 100px 0;
+            background: #0a0a0a;
+            position: relative;
+        }
+        .recruit-players::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml,%3Csvg width="84" height="48" viewBox="0 0 84 48" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M0 0h12v6H0V0zm28 8h12v6H28V8zm14-8h12v6H42V0zm14 0h12v6H56V0zm0 8h12v6H56V8zM42 8h12v6H42V8zm0 16h12v6H42v-6zm14-8h12v6H56v-6zm14 0h12v6H70v-6zm0-16h12v6H70V0zM28 32h12v6H28v-6zM14 16h12v6H14v-6zM0 24h12v6H0v-6zm0 8h12v6H0v-6zm14 0h12v6H14v-6zm14 8h12v6H28v-6zm-14 0h12v6H14v-6zm28 0h12v6H42v-6zm14-8h12v6H56v-6zm0-8h12v6H56v-6zm14 8h12v6H70v-6zm0 8h12v6H70v-6zM14 24h12v6H14v-6zm14-8h12v6H28v-6zM14 8h12v6H14V8zM0 8h12v6H0V8z" fill="%23ffd700" fill-opacity="0.05" fill-rule="evenodd"/%3E%3C/svg%3E');
+            z-index: 0;
+        }
+        .recruit-content {
+            position: relative;
+            z-index: 1;
+        }
+        .recruit-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+        }
+        .recruit-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 40px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+        .recruit-card h3 {
+            font-size: 1.5rem;
+            color: #ffd700;
+            margin-bottom: 20px;
+        }
+        .recruit-card ul {
+            list-style: none;
+        }
+        .recruit-card li {
+            padding: 10px 0;
+            color: rgba(255, 255, 255, 0.8);
+            position: relative;
+            padding-left: 25px;
+        }
+        .recruit-card li::before {
+            content: "⭐";
+            position: absolute;
+            left: 0;
+            font-size: 0.8rem;
+        }
+        /* 招募老板区 */
+        .recruit-bosses {
+            padding: 100px 0;
+            background: #121212;
+        }
+        .boss-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 60px;
+            align-items: center;
+        }
+        .boss-text {
+            flex: 1;
+            min-width: 300px;
+        }
+        .boss-text h3 {
+            font-size: 2rem;
+            color: #ffd700;
+            margin-bottom: 20px;
+        }
+        .boss-text ul {
+            list-style: none;
+            margin-bottom: 40px;
+        }
+        .boss-text li {
+            padding: 15px 0;
+            color: rgba(255, 255, 255, 0.8);
+            position: relative;
+            padding-left: 30px;
+        }
+        .boss-text li::before {
+            content: "👑";
+            position: absolute;
+            left: 0;
+            color: #ffd700;
+        }
+        .boss-contact {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 40px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            text-align: center;
+        }
+        .boss-contact h4 {
+            font-size: 1.3rem;
+            color: #ffd700;
+            margin-bottom: 20px;
+        }
+        .qrcode {
+            width: 200px;
+            height: 200px;
+            background: #fff;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #0a0a0a;
+            font-weight: bold;
+        }
+        /* 表单 */
+        #player-form {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 40px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            margin-top: 40px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: bold;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-size: 1rem;
+        }
+        .form-group select option {
+            background: #0a0a0a;
+            color: #fff;
+        }
+        .form-group textarea {
+            resize: vertical;
+            height: 120px;
+        }
+        /* 底部 */
+        footer {
+            background: #0a0a0a;
+            padding: 60px 0;
+            border-top: 1px solid rgba(255, 215, 0, 0.3);
+            text-align: center;
+        }
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 40px;
+        }
+        .footer-info {
+            flex: 1;
+            min-width: 250px;
+        }
+        .footer-info h4 {
+            font-size: 1.3rem;
+            color: #ffd700;
+            margin-bottom: 20px;
+        }
+        .footer-info p {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 10px;
+        }
+        .footer-bottom {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.5);
+        }
+        /* 弹窗 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: #121212;
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            border: 1px solid #ffd700;
+        }
+        .modal-content h3 {
+            color: #ffd700;
+            margin-bottom: 20px;
+        }
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .nav-links {
+                position: fixed;
+                top: 70px;
+                left: 0;
+                width: 100%;
+                background: #0a0a0a;
+                flex-direction: column;
+                align-items: center;
+                padding: 20px 0;
+                border-top: 1px solid rgba(255, 215, 0, 0.3);
+                transform: translateY(-100%);
+                opacity: 0;
+                transition: all 0.3s ease;
+                pointer-events: none;
+            }
+            .nav-links.active {
+                transform: translateY(0);
+                opacity: 1;
+                pointer-events: all;
+            }
+            .nav-links li {
+                margin: 15px 0;
+            }
+            .mobile-menu-btn {
+                display: block;
+            }
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            .hero p {
+                font-size: 1.1rem;
+            }
+            .btn-group {
+                flex-direction: column;
+                align-items: center;
+            }
+            .btn {
+                width: 200px;
+                text-align: center;
+            }
+            .services-grid,
+            .recruit-grid {
+                grid-template-columns: 1fr;
+            }
+            .boss-content {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav>
+        <div class="container nav-container">
+            <a href="#" class="logo">King俱乐部</a>
+            <button class="mobile-menu-btn">☰</button>
+            <ul class="nav-links">
+                <li><a href="#">首页</a></li>
+                <li><a href="#services">服务项目</a></li>
+                <li><a href="#recruit">加入我们</a></li>
+                <li><a href="#contact">联系客服</a></li>
+                <li><a href="#" id="admin-login-btn" style="color: #ffd700;">管理员登录</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero区 -->
+    <section class="hero">
+        <div class="container hero-content">
+            <h1>King俱乐部</h1>
+            <p>世间所有相遇，都是久别重逢。愿温柔相伴，自在同行。</p>
+            <div class="btn-group">
+                <a href="#services" class="btn btn-primary">老板下单</a>
+                <a href="#recruit" class="btn btn-secondary">打手加盟</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 服务项目区 -->
+    <section class="services" id="services">
+        <div class="container">
+            <div class="section-title">
+                <h2>服务项目</h2>
+                <p>专业游戏服务，为您带来极致体验</p>
+            </div>
+            <div class="services-grid">
+                <div class="service-card">
+                    <h3>王者荣耀</h3>
+                    <div class="price">专业代练与陪玩服务</div>
+                    <ul>
+                        <li><strong>代打价格参考：</strong></li>
+                        <li style="padding-left: 20px;">青铜/白银/黄金 → 铂金：单价约 2-3元/星</li>
+                        <li style="padding-left: 20px;">铂金 → 钻石：单价约 3-5元/星</li>
+                        <li style="padding-left: 20px;">钻石 → 星耀：单价约 5-10元/星</li>
+                        <li style="padding-left: 20px;">星耀 → 王者：单价约 10-20元/星</li>
+                        <li style="padding-left: 20px;">王者0星 → 荣耀(50星)：单价约15-25元/星</li>
+                        <li style="padding-left: 20px;">50星以上，100星以下：单价约25-45元/星</li>
+                        <li style="padding-left: 20px;">100星以上：45-60元/星</li>
+                        <li style="padding-left: 20px;">巅峰赛：按积分定价，每 100-300积分 约 30-80元</li>
+                        <li><strong>陪玩价格参考：</strong></li>
+                        <li style="padding-left: 20px;">娱乐陪/低段位：约 15-25元/小时，主打"态度好、不坑人"，能活跃气氛</li>
+                        <li style="padding-left: 20px;">技术陪/高段位：约 30-50元/小时，能带飞、战术指挥，帮助老板提升技术</li>
+                        <li style="padding-left: 20px;">大神陪/职业级：约 60元/小时以上，通常是国服水平或知名玩家，可高溢价</li>
+                        <li><strong>其他服务收费标准：</strong></li>
+                        <li style="padding-left: 20px;">指定英雄/熟练度：普通英雄约 10-30元/英雄；高难度或冷门英雄约 50-100元/英雄</li>
+                        <li style="padding-left: 20px;">英雄战力/标：战力单可按战力值收费，市价约 1-2元/万战力。省/市/国标因难度差异大，多为定制报价</li>
+                    </ul>
+                    <button class="btn btn-primary" style="margin-top: 20px; width: 100%;" onclick="openOrderModal('王者荣耀')">立即下单</button>
+                </div>
+                <div class="service-card">
+                    <h3>三角洲行动</h3>
+                    <div class="price">King电竞纯绿护航</div>
+                    <ul>
+                        <li><strong>体验单：</strong>机密航天19.9保370w</li>
+                        <li><strong>机密单：</strong></li>
+                        <li style="padding-left: 20px;">机密大坝5.5保100w</li>
+                        <li style="padding-left: 20px;">机密巴克什15保170w</li>
+                        <li style="padding-left: 20px;">机密航天20保250w</li>
+                        <li><strong>绝密单：</strong></li>
+                        <li style="padding-left: 20px;">绝密巴克什50保650w</li>
+                        <li style="padding-left: 20px;">绝密航天70保850w</li>
+                        <li><strong>赌红单：</strong></li>
+                        <li style="padding-left: 20px;">赌油单：机密70绝密115(不出一直打)</li>
+                        <li style="padding-left: 20px;">赌心单：300(绝密)</li>
+                        <li style="padding-left: 20px;">赌泪单：567(绝密)</li>
+                        <li style="padding-left: 20px;">赌锅单：25(机密)</li>
+                        <li style="padding-left: 20px;">赌万金泪冠：77(绝密)</li>
+                        <li style="padding-left: 20px;">复苏呼吸机：130(绝密)</li>
+                        <li style="padding-left: 20px;">天圆地方：50(绝密)</li>
+                        <li><strong>成就单：</strong></li>
+                        <li style="padding-left: 20px;">潮汐的救赎：169r绝密+300w保底</li>
+                        <li style="padding-left: 20px;">勇敢者：269r+350保底</li>
+                        <li style="padding-left: 20px;">天才少年：30r(扫号)</li>
+                    </ul>
+                    <button class="btn btn-primary" style="margin-top: 20px; width: 100%;" onclick="openOrderModal('三角洲行动')">立即下单</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 加入我们区 -->
+    <section class="recruit-players" id="recruit">
+        <div class="container recruit-content">
+            <div class="section-title">
+                <h2>加入我们</h2>
+                <p>成为King俱乐部的一员，开启职业游戏之路</p>
+            </div>
+            <div class="recruit-grid">
+                <div class="recruit-card">
+                    <h3>三角洲行动打手要求</h3>
+                    <h4 style="margin-top: 20px; color: #ffd700;">考核要求</h4>
+                    <ul>
+                        <li><strong>入职要求：</strong>绝密6杀</li>
+                    </ul>
+                    <h4 style="margin-top: 20px; color: #ffd700;">技术陪</h4>
+                    <ul>
+                        <li>要清图</li>
+                        <li>有给老板打保底的基本能力</li>
+                        <li>听老板指挥</li>
+                    </ul>
+                    <h4 style="margin-top: 20px; color: #ffd700;">娱乐陪</h4>
+                    <ul>
+                        <li>顺着老板</li>
+                        <li>跟老板说话的态度必须要好</li>
+                        <li>给老板好的游戏体验</li>
+                        <li>绝对听从老板的命令</li>
+                    </ul>
+                </div>
+                <div class="recruit-card">
+                    <h3>王者荣耀打手要求</h3>
+                    <h4 style="margin-top: 20px; color: #ffd700;">娱乐打手（陪玩/聊天/活跃气氛）</h4>
+                    <p style="margin-bottom: 15px;">适合人群：技术不是顶级，但性格好、会聊天、能带老板玩得开心。</p>
+                    <h5 style="margin-top: 15px; color: #ffd700;">一、基础门槛</h5>
+                    <ul>
+                        <li>段位要求：黄金（至少明白游戏规则）</li>
+                        <li>至少有1个熟练位置，能正常对局不坑</li>
+                        <li>近期10场排位/匹配胜率≥50%即可</li>
+                    </ul>
+                    <h5 style="margin-top: 15px; color: #ffd700;">二、核心能力</h5>
+                    <ul>
+                        <li>会聊天：能主动找话题，不冷场，不骂人，不甩锅</li>
+                        <li>情绪价值高：老板连跪时能安慰，赢了能夸夸</li>
+                        <li>能根据老板要求选英雄（哪怕是软辅、娱乐套路）</li>
+                        <li>接受老板"练英雄"或"乱玩"，不抱怨</li>
+                    </ul>
+                    <h5 style="margin-top: 15px; color: #ffd700;">三、态度要求</h5>
+                    <ul>
+                        <li>接单后5分钟内上号，主动开麦（除非老板要求静音）</li>
+                        <li>服务中多报点、多鼓励："板板这波很秀！""没事，下一把"</li>
+                        <li>严禁嫌弃老板技术差、段位低</li>
+                    </ul>
+                    <h5 style="margin-top: 15px; color: #ffd700;">四、审核流程</h5>
+                    <ul>
+                        <li>私聊内务主管发送：段位截图 + 近期战绩图 + 一句话自我介绍（性格/擅长位置）</li>
+                        <li>通过后进入2单试用期（主管或老打手跟听一次）</li>
+                        <li>试用期合格，正式入群</li>
+                    </ul>
+                    
+                    <h4 style="margin-top: 30px; color: #ffd700;">技术打手（代练/高强度上分）</h4>
+                    <p style="margin-bottom: 15px;">适合人群：技术顶尖、效率优先、能稳定完成高难度订单。</p>
+                    <h5 style="margin-top: 15px; color: #ffd700;">一、基础门槛</h5>
+                    <ul>
+                        <li>段位要求：王者50星以上或巅峰1850分以上</li>
+                        <li>主玩位置至少2个，需要至少1个省标英雄</li>
+                    </ul>
+                    <h5 style="margin-top: 15px; color: #ffd700;">二、核心能力</h5>
+                    <ul>
+                        <li>能完成指定英雄上分、战力标、巅峰赛冲刺等高要求订单</li>
+                        <li>熟悉版本强势英雄和克制关系</li>
+                        <li>能提供包星、包胜率服务，翻车主动补单</li>
+                        <li>效率高，平均每15-20分钟完成一局</li>
+                    </ul>
+                    <h5 style="margin-top: 15px; color: #ffd700;">三、态度要求</h5>
+                    <ul>
+                        <li>接单后3分钟内上号，服务中每20分钟同步一次战绩截图</li>
+                        <li>老板有问题及时回应，不装死、不消失</li>
+                        <li>严禁私聊挖老板、绕过俱乐部接单</li>
+                    </ul>
+                    <h5 style="margin-top: 15px; color: #ffd700;">四、审核流程</h5>
+                    <ul>
+                        <li>私聊内务主管发送：段位截图 + 省标截图 + 近期10场战绩图</li>
+                        <li>通过后进入3单试用期（主管跟单评价）</li>
+                        <li>试用期无重大失误，正式入群并开通信誉分+经验值系统</li>
+                    </ul>
+                </div>
+                <div class="recruit-card">
+                    <h3>加入好处</h3>
+                    <ul>
+                        <li>高分成比例，收入稳定</li>
+                        <li>派单稳定，不愁没单</li>
+                        <li>信誉分+经验值晋升体系</li>
+                        <li>专业培训，提升技术</li>
+                        <li>团队氛围好，结识朋友</li>
+                        <li>灵活工作时间，自由安排</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- 打手报名表单 -->
+            <form id="player-form">
+                <h3 style="color: #ffd700; margin-bottom: 30px; text-align: center;">打手报名</h3>
+                <div class="form-group">
+                    <label for="name">姓名</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="game">游戏</label>
+                    <select id="game" name="game" required>
+                        <option value="">请选择游戏</option>
+                        <option value="王者荣耀">王者荣耀</option>
+                        <option value="三角洲行动">三角洲行动</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="rank">段位</label>
+                    <input type="text" id="rank" name="rank" required>
+                </div>
+                <div class="form-group">
+                    <label for="wechat">微信</label>
+                    <input type="text" id="wechat" name="wechat" required>
+                </div>
+                <div class="form-group">
+                    <label for="intro">自我介绍</label>
+                    <textarea id="intro" name="intro" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">提交报名</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- 联系客服区 -->
+    <section class="contact-section" id="contact">
+        <div class="container">
+            <div class="section-title">
+                <h2>联系客服</h2>
+                <p>我们随时为您提供专业的服务和支持</p>
+            </div>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <h3>客服联系方式</h3>
+                    <div class="contact-details">
+                        <p><strong>客服电话：</strong>13720082235</p>
+                        <p><strong>客服QQ：</strong>2562089478</p>
+                        <p><strong>服务时间：</strong>24小时全天候服务</p>
+                        <p><strong>节假日：</strong>正常营业</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+    <!-- 底部 -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <h4>King俱乐部</h4>
+                    <p>专业游戏代练与陪玩服务</p>
+                    <p>让游戏更精彩，让陪伴更温暖</p>
+                </div>
+                <div class="footer-info">
+                    <h4>联系客服</h4>
+                    <div style="margin: 20px 0;">
+                        <p style="margin-bottom: 10px;"><strong>客服电话：</strong>13720082235</p>
+                        <p style="margin-bottom: 10px;"><strong>QQ客服：</strong>2562089478</p>
+                    </div>
+                    <p>客服电话：13720082235</p>
+                    <p>客服QQ：2562089478</p>
+                </div>
+                <div class="footer-info">
+                    <h4>服务时间</h4>
+                    <p>24小时全天候服务</p>
+                    <p>节假日不休</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 King俱乐部. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+
+
+
+    <!-- 提交成功弹窗 -->
+    <div class="modal" id="success-modal">
+        <div class="modal-content">
+            <button class="close-btn">&times;</button>
+            <h3>提交成功</h3>
+            <p>我们会尽快联系您，感谢您的加入！</p>
+        </div>
+    </div>
+
+    <!-- 管理员登录弹窗 -->
+    <div class="modal" id="admin-login-modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <button class="close-btn">&times;</button>
+            <h3>管理员登录</h3>
+            <form id="admin-login-form">
+                <div class="form-group">
+                    <label for="admin-password">密码</label>
+                    <input type="password" id="admin-password" name="admin-password" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">登录</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 管理员面板 -->
+    <div class="modal" id="admin-panel" style="display: none;">
+        <div class="modal-content" style="max-width: 800px; max-height: 80vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3>管理员面板</h3>
+                <button id="admin-logout" class="btn btn-secondary">退出</button>
+            </div>
+            <div id="submissions-container">
+                <h4>打手报名列表</h4>
+                <div id="player-submissions"></div>
+                <h4 style="margin-top: 40px;">老板点单列表</h4>
+                <div id="order-submissions"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 老板点单模态框 -->
+    <div class="modal" id="order-modal" style="display: none;">
+        <div class="modal-content" style="max-width: 500px;">
+            <button class="close-btn">&times;</button>
+            <h3>老板点单</h3>
+            <form id="order-form">
+                <div class="form-group">
+                    <label for="order-game">游戏</label>
+                    <input type="text" id="order-game" name="order-game" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="order-name">称呼</label>
+                    <input type="text" id="order-name" name="order-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="order-wechat">手机号</label>
+                    <input type="text" id="order-wechat" name="order-wechat" required>
+                </div>
+                <div class="form-group">
+                    <label for="order-service">服务类型</label>
+                    <select id="order-service" name="order-service" required>
+                        <option value="">请选择服务类型</option>
+                        <option value="代练">代练</option>
+                        <option value="陪玩">陪玩</option>
+                        <option value="其他">其他</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="order-demand">具体需求</label>
+                    <textarea id="order-demand" name="order-demand" rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="order-budget">预算</label>
+                    <input type="text" id="order-budget" name="order-budget" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">提交订单</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 导航栏移动端菜单
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        const navLinks = document.querySelector('.nav-links');
+        
+        mobileMenuBtn.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+        
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ 
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                    // 关闭移动端菜单
+                    navLinks.classList.remove('active');
+                }
+            });
+        });
+        
+        // 表单提交
+        const playerForm = document.getElementById('player-form');
+        const successModal = document.getElementById('success-modal');
+        const closeBtns = document.querySelectorAll('.close-btn');
+        
+        playerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // 获取表单数据
+            const formData = {
+                name: document.getElementById('name').value,
+                game: document.getElementById('game').value,
+                rank: document.getElementById('rank').value,
+                wechat: document.getElementById('wechat').value,
+                intro: document.getElementById('intro').value,
+                timestamp: new Date().toLocaleString()
+            };
+            
+            // 存储到localStorage
+            let submissions = JSON.parse(localStorage.getItem('playerSubmissions') || '[]');
+            submissions.push(formData);
+            localStorage.setItem('playerSubmissions', JSON.stringify(submissions));
+            
+            // 显示成功弹窗
+            successModal.style.display = 'flex';
+            // 重置表单
+            playerForm.reset();
+        });
+        
+        // 关闭弹窗
+        closeBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                btn.closest('.modal').style.display = 'none';
+            });
+        });
+        
+        // 点击弹窗外部关闭
+        window.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                e.target.style.display = 'none';
+            }
+        });
+        
+        // 管理员登录
+        const adminLoginBtn = document.getElementById('admin-login-btn');
+        const adminLoginModal = document.getElementById('admin-login-modal');
+        const adminLoginForm = document.getElementById('admin-login-form');
+        const adminPanel = document.getElementById('admin-panel');
+        const adminLogout = document.getElementById('admin-logout');
+        const playerSubmissionsContainer = document.getElementById('player-submissions');
+        
+        adminLoginBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            adminLoginModal.style.display = 'flex';
+        });
+        
+        adminLoginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const password = document.getElementById('admin-password').value;
+            if (password === '140618') {
+                adminLoginModal.style.display = 'none';
+                adminPanel.style.display = 'flex';
+                displaySubmissions();
+                displayOrders();
+            } else {
+                alert('密码错误，请重试');
+            }
+        });
+        
+        adminLogout.addEventListener('click', () => {
+            adminPanel.style.display = 'none';
+        });
+        
+        function displaySubmissions() {
+            const submissions = JSON.parse(localStorage.getItem('playerSubmissions') || '[]');
+            if (submissions.length === 0) {
+                playerSubmissionsContainer.innerHTML = '<p>暂无提交记录</p>';
+                return;
+            }
+            
+            let html = '<table style="width: 100%; border-collapse: collapse; margin-top: 20px;">';
+            html += '<thead><tr style="border-bottom: 1px solid #ffd700;"><th style="padding: 10px; text-align: left;">姓名</th><th style="padding: 10px; text-align: left;">游戏</th><th style="padding: 10px; text-align: left;">段位</th><th style="padding: 10px; text-align: left;">微信</th><th style="padding: 10px; text-align: left;">提交时间</th><th style="padding: 10px; text-align: center;">操作</th></tr></thead>';
+            html += '<tbody>';
+            
+            submissions.forEach((submission, index) => {
+                html += `<tr style="border-bottom: 1px solid rgba(255, 215, 0, 0.3);">`;
+                html += `<td style="padding: 10px;">${submission.name}</td>`;
+                html += `<td style="padding: 10px;">${submission.game}</td>`;
+                html += `<td style="padding: 10px;">${submission.rank}</td>`;
+                html += `<td style="padding: 10px;">${submission.wechat}</td>`;
+                html += `<td style="padding: 10px;">${submission.timestamp}</td>`;
+                html += `<td style="padding: 10px; text-align: center;"><button class="btn btn-danger" onclick="deleteSubmission(${index})">删除</button></td>`;
+                html += `</tr>`;
+            });
+            
+            html += '</tbody></table>';
+            playerSubmissionsContainer.innerHTML = html;
+        }
+        
+        function deleteSubmission(index) {
+            if (confirm('确定要删除这条记录吗？')) {
+                let submissions = JSON.parse(localStorage.getItem('playerSubmissions') || '[]');
+                submissions.splice(index, 1);
+                localStorage.setItem('playerSubmissions', JSON.stringify(submissions));
+                displaySubmissions();
+            }
+        }
+        
+        // 老板点单功能
+        const orderModal = document.getElementById('order-modal');
+        const orderForm = document.getElementById('order-form');
+        const orderSubmissionsContainer = document.getElementById('order-submissions');
+        
+        function openOrderModal(game) {
+            document.getElementById('order-game').value = game;
+            orderModal.style.display = 'flex';
+        }
+        
+        orderForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // 获取表单数据
+            const formData = {
+                game: document.getElementById('order-game').value,
+                name: document.getElementById('order-name').value,
+                phone: document.getElementById('order-wechat').value,
+                service: document.getElementById('order-service').value,
+                demand: document.getElementById('order-demand').value,
+                budget: document.getElementById('order-budget').value,
+                timestamp: new Date().toLocaleString()
+            };
+            
+            // 存储到localStorage
+            let orders = JSON.parse(localStorage.getItem('orderSubmissions') || '[]');
+            orders.push(formData);
+            localStorage.setItem('orderSubmissions', JSON.stringify(orders));
+            
+            // 显示成功弹窗
+            successModal.style.display = 'flex';
+            // 重置表单
+            orderForm.reset();
+            // 关闭点单模态框
+            orderModal.style.display = 'none';
+        });
+        
+        function displayOrders() {
+            const orders = JSON.parse(localStorage.getItem('orderSubmissions') || '[]');
+            if (orders.length === 0) {
+                orderSubmissionsContainer.innerHTML = '<p>暂无订单记录</p>';
+                return;
+            }
+            
+            let html = '<table style="width: 100%; border-collapse: collapse; margin-top: 20px;">';
+            html += '<thead><tr style="border-bottom: 1px solid #ffd700;"><th style="padding: 10px; text-align: left;">游戏</th><th style="padding: 10px; text-align: left;">称呼</th><th style="padding: 10px; text-align: left;">手机号</th><th style="padding: 10px; text-align: left;">服务类型</th><th style="padding: 10px; text-align: left;">预算</th><th style="padding: 10px; text-align: left;">提交时间</th><th style="padding: 10px; text-align: center;">操作</th></tr></thead>';
+            html += '<tbody>';
+            
+            orders.forEach((order, index) => {
+                html += `<tr style="border-bottom: 1px solid rgba(255, 215, 0, 0.3);">`;
+                html += `<td style="padding: 10px;">${order.game}</td>`;
+                html += `<td style="padding: 10px;">${order.name}</td>`;
+                html += `<td style="padding: 10px;">${order.phone}</td>`;
+                html += `<td style="padding: 10px;">${order.service}</td>`;
+                html += `<td style="padding: 10px;">${order.budget}</td>`;
+                html += `<td style="padding: 10px;">${order.timestamp}</td>`;
+                html += `<td style="padding: 10px; text-align: center;"><button class="btn btn-danger" onclick="deleteOrder(${index})">删除</button></td>`;
+                html += `</tr>`;
+            });
+            
+            html += '</tbody></table>';
+            orderSubmissionsContainer.innerHTML = html;
+        }
+        
+        function deleteOrder(index) {
+            if (confirm('确定要删除这条订单记录吗？')) {
+                let orders = JSON.parse(localStorage.getItem('orderSubmissions') || '[]');
+                orders.splice(index, 1);
+                localStorage.setItem('orderSubmissions', JSON.stringify(orders));
+                displayOrders();
+            }
+        }
+        
+        // 导航栏滚动效果
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 100) {
+                nav.style.background = 'rgba(10, 10, 10, 0.98)';
+            } else {
+                nav.style.background = 'rgba(10, 10, 10, 0.95)';
+            }
+        });
+    </script>
+</body>
+</html>
